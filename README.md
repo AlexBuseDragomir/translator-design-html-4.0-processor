@@ -44,5 +44,6 @@ In addition, the processor must verify the syntax for contained URLs.
 
 ## Disclaimer
 
-All photos used in this project are for **educational purposes only**. I do not own any of the photos used.
+All photos used in this project are for **educational purposes only**.  
+I do not own any of the photos used.  
 Not to be used for commercial purposes.
