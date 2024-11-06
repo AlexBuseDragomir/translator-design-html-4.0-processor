@@ -41,3 +41,8 @@ Write a processor for a subset of HTML 4.0 documents with a body, containing the
 The formal definitions of the HTML elements written in SGML can be viewed as grammar rules. The processor must validate an input HTML document and determine its internal structure according to the DOM model (Document Object Model for XML/HTML Documents). The structure of a document is a tree with the document as the root node.
 
 In addition, the processor must verify the syntax for contained URLs.
+
+## Disclaimer
+
+All photos used in this project are for **educational purposes only**. I do not own any of the photos used.
+Not to be used for commercial purposes.
