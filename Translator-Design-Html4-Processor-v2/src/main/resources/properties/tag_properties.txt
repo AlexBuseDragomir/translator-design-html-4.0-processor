@@ -1,0 +1,62 @@
+body: 
+	background 
+	bgcolor
+	
+table: 
+	align 
+	bgcolor 
+	border 
+	summary 
+	width
+	
+tr: 
+	align 
+	bgcolor
+	
+th: 
+	bgcolor 
+	width 
+	height
+
+td:
+    align
+    bgcolor
+    colspan
+    width
+    valign
+    nowrap
+	
+img: 
+	align
+	src
+	alt
+	height
+	width
+	
+ul: 
+	type
+	
+ol: 
+	reversed
+	start
+	type
+
+li:
+	type
+
+h1 - h6:
+	align
+	
+font:
+	color
+	face
+	size
+	
+a:
+	type
+	rel
+	href
+	shape
+	
+p: 
+	align

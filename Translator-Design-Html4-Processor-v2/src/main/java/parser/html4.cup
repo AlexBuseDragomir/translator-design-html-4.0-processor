@@ -1,0 +1,1334 @@
+import java_cup.runtime.*;
+import java.util.*; 
+
+parser code {:
+    
+    public void report_error(String message, Object info) {
+   
+     
+        StringBuffer m = new StringBuffer("Error");
+   
+        
+        if (info instanceof java_cup.runtime.Symbol) {
+            
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+   
+            
+            if (s.left >= 0) {                
+                
+                m.append(" in line " + (s.left + 1));
+               
+                if (s.right >= 0)                    
+                    
+                    m.append(", column " + (s.right + 1));
+            }
+        }
+
+        m.append(" : " + message);
+
+        System.err.println(m);
+    }
+   
+    
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+:}; 
+
+
+terminal String HTML, EHTML,
+				HEAD, EHEAD,
+				TITLE, ETITLE,
+				LINK,
+				TEXT,
+				BODY, EBODY,
+				FRAMESET, EFRAMESET,
+				FRAME, NOFRAMES, ENOFRAMES,
+				FORM, EFORM, INPUT, SELECT, ESELECT, OPTION, EOPTION,
+				TABLE, ETABLE, TR, ETR, TH, ETH, TD, ETD,
+				THEAD, ETHEAD, TBODY, ETBODY, TFOOT, ETFOOT,
+				IMG,A,EA,
+				UL,EUL,OL,EOL,LI,ELI,
+				B,EB,I,EI,U,EU,
+				SMALL,ESMALL,SUB,ESUB,SUP,ESUP,
+				FONT,EFONT,
+				CENTER,ECENTER,
+				H1,EH1,H2,EH2,H3,EH3,H4,EH4,H5,EH5,H6,EH6,
+				P,EP,
+				HR,BR;
+
+
+non terminal Node html_tag;
+
+
+non terminal Vector  html_content,
+			         body_tag, body_contents, body_content,
+			         head_tag, head_contents, head_content,
+					 link_content, link_contents,
+			         frameset_tag, frameset_contents, frameset_content,
+			         form_tag, form_contents, form_content,
+					 form_block, form_center_tag, form_body_content,
+			         table_tag, table_contents, table_content, tr_tag,
+					 table_cells, table_cell,
+			         ol_tag, ul_tag, li_tags, li_tag,
+			         options, option,
+			         a_tag, a_contents, a_content,
+			         p_tag, flows, flow, physical_style, center_tag,
+					 rel, media, type, href,
+			         heading, text, block;
+
+
+
+html_tag     ::= HTML:h html_content:c EHTML:e
+                 {:
+                   Node open = new Node(h, c);
+                   Node close = new Node(e, null);
+
+                   Vector v = new Vector();
+
+                   v.addElement(open);
+                   v.addElement(close);
+
+                   documentNode = new Node("document", v);
+                   documentNode.resultPrinter(documentNode, 0);
+                 :};
+
+html_content  ::= body_tag:b
+                   {:
+                     documentNode = b;
+
+                   :}
+                  |
+                  frameset_tag:f
+                    {:
+                      documentNode = f;
+                    :}
+								  |
+                  head_tag:h
+                    {:
+                      documentNode = h;
+                    :}
+                  ;
+
+body_tag      ::= BODY:b EBODY:e
+                  {:
+                     Node open = new Node(b, null);
+                     Node close = new Node(e, null);
+
+                     Vector v = new Vector();
+
+                     v.addElement(open);
+                     v.addElement(close);
+
+                     documentNode = v;
+                  :}
+                  |
+                  BODY:b body_contents:bc EBODY:e
+                     {:
+                        Node open = new Node(b, bc);
+                        Node close = new Node(e, null);
+
+                        Vector v = new Vector();
+
+                        v.addElement(open);
+                        v.addElement(close);
+
+                        documentNode = v;
+                     :}
+
+                 ;
+
+frameset_tag    ::= FRAMESET:f frameset_contents:c EFRAMESET:e
+                     {:
+                        Node open = new Node(f, c);
+                        Node close = new Node(e, null);
+
+                        Vector v = new Vector();
+
+                        v.addElement(open);
+                        v.addElement(close);
+
+                        documentNode = v;
+                     :}
+                    |
+                    FRAMESET:f EFRAMESET:e
+                     {:
+                        Node open = new Node(f, null);
+                        Node close = new Node(e, null);
+
+                        Vector v = new Vector();
+
+                        v.addElement(open);
+                        v.addElement(close);
+
+                        documentNode = v;
+                     :}
+                     ;
+
+frameset_contents  ::= frameset_contents:fs frameset_content:f
+                       {:
+                            Enumeration e = f.elements();
+
+							while (e.hasMoreElements())
+								fs.addElement((Node) e.nextElement());
+
+							documentNode = fs;
+                       :}
+                      |
+                      frameset_content:f
+                        {:
+                           documentNode = f;
+                        :}
+                      ;
+
+frameset_content    ::= FRAME:f
+                        {:
+                         Node open = new Node(f, null);
+
+                         Vector v = new Vector();
+                         v.addElement(open);
+
+						 documentNode = v;
+						:}
+						|
+						NOFRAMES:nf ENOFRAMES:e
+						{:
+								 Node open = new Node(nf, null);
+								 Node close = new Node(e, null);
+								 
+								 Vector v = new Vector();
+								 
+								 v.addElement(open);
+								 v.addElement(close);
+								 
+								 documentNode = v;
+						:}
+						|
+						NOFRAMES:nf body_contents:bc ENOFRAMES:e
+						{:
+									Node open = new Node(nf, bc);
+									Node close = new Node(e, null);
+									
+									Vector v = new Vector();
+									
+									v.addElement(open);
+									v.addElement(close);
+									
+									documentNode = v;
+						:}
+					    ;
+										 
+body_contents    ::=  body_contents:cs body_content:c
+                         {: 
+                            Enumeration e = c.elements();
+														
+							while (e.hasMoreElements())
+								cs.addElement((Node) e.nextElement());
+
+							documentNode = cs;
+                         :}
+                      |
+                      body_content:c
+                        {:
+                           documentNode = c;
+                        :}
+                      ; 
+
+body_content    ::= block:b
+                       {:
+                         documentNode = b;
+                       :}
+                    |
+                    heading:h
+                        {:
+                         documentNode = h;
+                       :}
+                    |
+                    text:t
+                        {:
+                         documentNode = t;
+                       :}
+                    |
+                    HR:hr
+                        {:
+                         Node open = new Node(hr, null);
+                        
+ 						 Vector v = new Vector();
+                         v.addElement(open);
+												 
+                         documentNode = v;
+                       :}
+                    ;
+
+head_tag    ::=     HEAD:h head_contents:c EHEAD:e
+                     {:
+                        Node open = new Node(h, c);
+                        Node close = new Node(e, null);
+
+                        Vector v = new Vector();
+
+                        v.addElement(open);
+                        v.addElement(close);
+
+                        documentNode = v;
+                     :}
+                    |
+                    HEAD:h EHEAD:e
+                     {:
+                        Node open = new Node(h, null);
+                        Node close = new Node(e, null);
+
+                        Vector v = new Vector();
+
+                        v.addElement(open);
+                        v.addElement(close);
+
+                        documentNode = v;
+                     :}
+                     ;
+
+head_contents  ::=    head_contents:hs head_content:h
+                         {:
+                            Enumeration e = h.elements();
+
+							while (e.hasMoreElements())
+								hs.addElement((Node) e.nextElement());
+
+							documentNode = hs;
+                         :}
+                      |
+                      head_content:h
+                        {:
+                           documentNode = h;
+                        :}
+                      ;
+
+head_content    ::=   HEAD:h
+                        {:
+                         Node open = new Node(h, null);
+
+                         Vector v = new Vector();
+                         v.addElement(open);
+
+						 documentNode = v;
+                       :}
+                      |
+                      TITLE:t ETITLE:e
+                         {:
+                           Node open = new Node(t, null);
+                           Node close = new Node(e, null);
+
+                           Vector v = new Vector();
+
+                           v.addElement(open);
+                           v.addElement(close);
+
+                           documentNode = v;
+                        :}
+                      |
+					 LINK:l
+                        {:
+                          Node open = new Node(l, null);
+
+                          Vector v = new Vector();
+                          v.addElement(open);
+
+                          documentNode = v;
+                        :}
+                      |
+                      LINK:l link_contents:c
+                         {:
+                            Node open = new Node(l, c);
+
+                            Vector v = new Vector();
+                            v.addElement(open);
+
+                            documentNode = v;
+                         :}
+                     ;
+										 
+link_contents    ::=  link_contents:ls link_content:l
+                         {: 
+                            Enumeration e = l.elements();
+														
+							while (e.hasMoreElements())
+								ls.addElement((Node) e.nextElement());
+
+							documentNode = ls;
+                         :}
+                      |
+                      link_content:l
+                        {:
+                           documentNode = l;
+                        :}
+                      ; 
+
+link_content    ::= media:m
+                       {:
+                         documentNode = m;
+                       :}
+                    |
+                    rel:r
+                        {:
+                         documentNode = r;
+                       :}
+                    |
+                    type:t
+                        {:
+                         documentNode = t;
+                       :}
+                    |
+                    href:h
+                        {:
+                         documentNode = h;
+                       :}
+                    ;
+
+form_body_content  ::= form_block:b
+                       {:
+                         documentNode = b;
+                       :}
+                       |
+                       heading:h
+                           {:
+                            documentNode = h;
+                          :}
+                       |
+                       text:t
+                           {:
+                            documentNode = t;
+                          :}
+                       |
+                       HR:hr
+                           {:
+                            Node open = new Node(hr, null);
+														
+                            Vector v = new Vector();
+                            v.addElement(open);
+														
+                            documentNode = v;
+                          :}
+                       ;
+
+
+
+block           ::= center_tag:ct
+                         {:
+                            documentNode = ct;
+                         :}
+                    |
+                    form_tag:ft
+                         {:
+                            documentNode = ft;
+                         :}
+                    |
+                    ol_tag:ot
+                         {:
+                            documentNode = ot;
+                         :}
+                    |
+                    p_tag:pt
+                         {:
+                            documentNode = pt;
+                         :}
+                    |
+                    table_tag:tt
+                         {:
+                            documentNode = tt;
+                         :}
+                    |
+                    ul_tag:ut
+                         {:
+                            documentNode = ut;
+                         :} 
+                    ;
+
+form_block        ::= form_center_tag:fct
+                         {:
+                            documentNode = fct;
+                         :}
+                      |
+                      ol_tag:ot
+                           {:
+                              documentNode = ot;
+                           :}
+                      |
+                      p_tag:pt
+                           {:
+                              documentNode = pt;
+                           :}
+                      |
+                      table_tag:tt
+                           {:
+                              documentNode = tt;
+                           :}
+                      |
+                      ul_tag:ut
+                           {:
+                              documentNode = ut;
+                           :} 
+                      ;
+
+center_tag       ::=  CENTER:ctr body_content:c ECENTER:e
+                          {:
+                            Node open = new Node(ctr, c);
+                            Node close = new Node(e, null);
+														
+                            Vector v = new Vector();
+														
+                            v.addElement(open);
+                            v.addElement(close);
+														
+                            documentNode = v;
+                         :} 
+                      ;
+
+form_center_tag       ::= CENTER:ctr form_body_content:fc ECENTER:e
+                          {:
+                            Node open = new Node(ctr, fc);
+                            Node close = new Node(e, null);
+														
+                            Vector v = new Vector();
+														
+                            v.addElement(open);
+                            v.addElement(close);
+														
+                            documentNode = v;
+                         :} 
+                      ;
+
+form_tag         ::=  FORM:f EFORM:e
+                        {:
+                          Node open = new Node(f, null);
+                          Node close = new Node(e, null);
+													
+                          Vector v = new Vector();
+													
+                          v.addElement(open);
+                          v.addElement(close);
+													
+                          documentNode = v;
+                        :}
+                      |
+                      FORM:f form_contents:c EFORM:e
+                        {:
+                          Node open = new Node(f, c);
+                          Node close = new Node(e, null);
+													
+                          Vector v = new Vector();
+													
+                          v.addElement(open);
+                          v.addElement(close);
+													
+                          documentNode = v;
+                        :} 
+                   ;
+
+form_contents    ::=  form_contents:cs form_content:c
+                         {: 
+                            Enumeration e = c.elements();
+		                        
+							while (e.hasMoreElements())
+	      	                    cs.addElement((Node) e.nextElement()); 
+														
+                            documentNode = cs;
+                         :}
+                      |
+                      form_content:c
+                        {:
+                           documentNode = c;
+                        :}
+                      ; 
+
+form_content      ::= INPUT:c
+                        {:
+                          Node open = new Node(c, null);
+													
+                          Vector v = new Vector();
+                          v.addElement(open);
+													
+                          documentNode = v;
+                         :}
+                       |
+                       form_body_content:bc
+                          {:
+                            documentNode = bc;
+                         :}
+                       |
+                       SELECT:f options:os ESELECT:e
+                           {:
+                              Node open = new Node(f, os);
+                              Node close = new Node(e, null);
+															
+                              Vector v = new Vector();
+															
+                              v.addElement(open);
+                              v.addElement(close);
+                             
+ 							  documentNode = v;
+                         :} 
+                       ;
+
+options          ::=  options:os option:o
+                         {: 
+                            Enumeration e = o.elements();
+		                        
+							while (e.hasMoreElements())
+	      	                    os.addElement((Node) e.nextElement()); 
+														
+                            documentNode = os;
+                         :}
+                      |
+                      option:o
+                        {:
+                           documentNode = o;
+                        :}
+                      ; 
+
+option            ::=    OPTION:o TEXT:t EOPTION:e
+                         {:
+                              Node text_open = new Node(t, null);
+                              
+							  Vector v = new Vector();
+                              v.addElement(text_open);
+															
+                              Node open = new Node(o, v);
+                              Node close = new Node(e, null);
+															
+                              Vector final_vect = new Vector();
+															
+                              final_vect.addElement(open);
+                              final_vect.addElement(close);
+															
+                              documentNode = final_vect;
+                         :}
+												 ;
+
+ol_tag             ::=   OL:ol li_tags:li EOL:e
+                         {:
+                              Node open = new Node(ol, li);
+                              Node close = new Node(e, null);
+															
+                              Vector v = new Vector();
+															
+                              v.addElement(open);
+                              v.addElement(close);
+															
+                              documentNode = v;
+                         :}
+                         ;
+
+ul_tag             ::=   UL:ul li_tags:li EUL:e
+                         {:
+                            Node open = new Node(ul, li);
+                            Node close = new Node(e, null);
+														
+                            Vector v = new Vector();
+														
+                            v.addElement(open);
+                            v.addElement(close);
+														
+                            documentNode = v;
+                         :}
+                         ;
+
+li_tags           ::=    li_tags:lis li_tag:li
+                         {: 
+                            Enumeration e = li.elements();
+														
+		                     while (e.hasMoreElements())
+	      	                   lis.addElement((Node) e.nextElement());
+														
+                            documentNode = lis;
+                         :}
+                         |
+                         li_tag:li
+                         {:
+                            documentNode = li;
+                         :}
+                         ; 
+
+li_tag             ::=    LI:li flows:fl ELI:e               
+                          {:
+                              Node open = new Node(li, fl);
+                              Node close = new Node(e, null);
+															
+                              Vector v = new Vector();
+															
+                              v.addElement(open);
+                              v.addElement(close);
+															
+                              documentNode = v;
+                          :}
+                          |
+                          LI:li ELI:e               
+                            {:
+                                Node open = new Node(li, null);
+                                Node close = new Node(e, null);
+																
+                                Vector v = new Vector();
+																
+                                v.addElement(open);
+                                v.addElement(close);
+																
+                                documentNode = v;
+                            :}
+                            ;
+
+flows               ::=  flows:fs flow:f
+                         {: 
+                            Enumeration e = f.elements();
+		                        
+							while (e.hasMoreElements())
+	      	                   fs.addElement((Node) e.nextElement());
+														
+                            documentNode = fs;
+                         :}
+                         |
+                         flow:f
+                         {:
+                              documentNode = f;
+                         :}
+                         ; 
+											 
+flow                ::= block:b
+                        {:
+                           documentNode = b;
+                        :}
+                        |
+                        text:t
+                        {:
+                           documentNode = t;
+                        :}
+                        ;
+
+text                 ::=   BR:br
+                           {:
+                              Node open = new Node(br, null);
+															
+                              Vector v = new Vector();
+                              v.addElement(open);
+															
+                              documentNode = v;
+                           :}
+                           |
+                           IMG:img
+                           {:
+                              Node open = new Node(img, null);
+															
+                              Vector v = new Vector();
+                              v.addElement(open);
+															
+                              documentNode = v;
+                           :}
+                           |
+                           a_tag:a 
+                           {:
+                              documentNode = a;
+                           :}
+                           |
+                           TEXT:t
+                           {:
+                              Node open = new Node(t, null);
+															
+                              Vector v = new Vector();
+                              v.addElement(open);
+															
+                              documentNode = v;
+                           :} 
+                           |
+                           physical_style:ps 
+                           {:
+                              documentNode = ps;
+                           :}
+                           ; 
+
+a_tag             ::=  A:a a_contents:c EA:e               
+                          {:
+                              Node open = new Node(a, c);
+                              Node close = new Node(e, null);
+															
+                              Vector v = new Vector();
+															
+                              v.addElement(open);
+                              v.addElement(close);
+															
+                              documentNode = v;
+                         :}
+                       |
+                       A:a EA:e               
+                          {:
+                              Node open = new Node(a, null);
+                              Node close = new Node(e, null);
+															
+                              Vector v = new Vector();
+															
+                              v.addElement(open);
+                              v.addElement(close);
+															
+                              documentNode = v;
+                         :}
+                       ;
+
+a_contents          ::=  a_contents:as a_content:a
+                         {: 
+                            Enumeration e = a.elements();
+		                        
+							while (e.hasMoreElements())
+	      	                   as.addElement((Node) e.nextElement());
+													 
+                            documentNode = as;
+                         :}
+                       |
+                        a_content:a
+                          {:
+                             documentNode = a;
+                          :}
+                       ;
+											 
+a_content           ::=heading:h
+                           {:
+                             documentNode = h;
+                           :}
+                        |
+                        text:t
+                           {:
+                             documentNode = t;
+                          :}
+                        ;
+
+heading              ::=   H1:h1 text:text EH1:e               
+                           {:
+                               Node open = new Node(h1, text);
+                               Node close = new Node(e, null);
+															 
+                               Vector v = new Vector();
+															 
+                               v.addElement(open);
+                               v.addElement(close);
+															 
+                               documentNode = v;
+                           :}
+                           |
+                           H1:h1 EH1:e               
+                             {:
+                                 Node open = new Node(h1, null);
+                                 Node close = new Node(e, null);
+													  		 
+                                 Vector v = new Vector();
+													  		 
+                                 v.addElement(open);
+                                 v.addElement(close);
+													  		 
+                                 documentNode = v;
+                             :}  
+                           |
+                           H2:h2 text:text EH2:e               
+                             {:
+                                 Node open = new Node(h2, text);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           H2:h2 EH2:e               
+                             {:
+                                 Node open = new Node(h2, null);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           H3:h3 text:text EH3:e               
+                             {:
+                                 Node open = new Node(h3, text);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :}
+                           |
+                           H3:h3 EH3:e               
+                             {:
+                                 Node open = new Node(h3, null);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :}   
+                           |
+                           H4:h4 text:text EH4:e               
+                             {:
+                                 Node open = new Node(h4, text);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           H4:h4 EH4:e               
+                             {:
+                                 Node open = new Node(h4, null);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :}  
+                           |
+                           H5:h5 text:text EH5:e               
+                             {:
+                                 Node open = new Node(h5, text);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           H5:h5 EH5:e               
+                             {:
+                                 Node open = new Node(h5, null);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           H6:h6 text:text EH6:e               
+                             {:
+                                 Node open = new Node(h6, text);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           H6:h6 EH6:e               
+                             {:
+                                 Node open = new Node(h6, null);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                         ;
+
+physical_style     ::=     B:b text:text EB:e               
+						   {:
+					   		    Node open = new Node(b, text);
+					   		    Node close = new Node(e, null);
+
+					   		    Vector v = new Vector();
+
+					   		    v.addElement(open);
+					   		    v.addElement(close);
+
+					   		    documentNode = v;
+						   :}
+                           |
+                           B:b EB:e               
+                             {:
+                                 Node open = new Node(b, null);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :}  
+                           |
+                           I:i text:text EI:e               
+                             {:
+                                 Node open = new Node(i, text);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           I:i  EI:e               
+                             {:
+                                 Node open = new Node(i, null);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           U:u text:text EU:e               
+                             {:
+                                 Node open = new Node(u, text);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           U:u EU:e               
+                             {:
+                                 Node open = new Node(u, null);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           SMALL:s text:text ESMALL:e               
+                             {:
+                                 Node open = new Node(s, text);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           SMALL:s ESMALL:e               
+                             {:
+                                 Node open = new Node(s, null);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           SUP:sup text:text ESUP:e               
+                             {:
+                                 Node open = new Node(sup, text);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           SUP:sup ESUP:e               
+                             {:
+                                 Node open = new Node(sup, null);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :}  
+                           |
+                           SUB:sub text:text ESUB:e               
+                             {:
+                                 Node open = new Node(sub, text);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           SUB:sub ESUB:e               
+                             {:
+                                 Node open = new Node(sub, null);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           FONT:font TEXT:text EFONT:e               
+                             {:  
+                                 Node text_node = new Node(text, null);
+																 
+                                 Vector text_vector = new Vector();
+                                 text_vector.addElement(text_node); 
+																 
+                                 Node open = new Node(font, text_vector);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           |
+                           FONT:font EFONT:e               
+                             {:  
+                                 Node open = new Node(font, null);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                           ;
+												 
+p_tag                ::=   P:p TEXT:text EP:e               
+                           {:  
+                               Node text_node = new Node(text, null);
+															 
+                               Vector text_vector = new Vector();
+                               text_vector.addElement(text_node); 
+															 
+                               Node open = new Node(p, text_vector);
+                               Node close = new Node(e, null);
+															 
+                               Vector v = new Vector();
+															 
+                               v.addElement(open);
+                               v.addElement(close);
+															 
+                               documentNode = v;
+                           :} 
+                           |
+                           P:p EP:e               
+                            {:  
+                                Node open = new Node(p, null);
+                                Node close = new Node(e, null);
+																
+                                Vector v = new Vector();
+																
+                                v.addElement(open);
+                                v.addElement(close);
+																
+                                documentNode = v;
+                            :} 
+                          ;
+                       
+table_tag             ::=   TABLE:t table_contents:c ETABLE:e
+                            {:
+                               Node open = new Node(t, c);
+                               Node close = new Node(e, null);
+															 
+                               Vector v = new Vector();
+															 
+                               v.addElement(open);
+                               v.addElement(close);
+															 
+                               documentNode = v;
+                            :}  
+                            |
+                            TABLE:t ETABLE:e
+                              {:
+                                 Node open = new Node(t, null);
+                                 Node close = new Node(e, null);
+																 
+                                 Vector v = new Vector();
+																 
+                                 v.addElement(open);
+                                 v.addElement(close);
+																 
+                                 documentNode = v;
+                             :} 
+                            ;
+														
+table_contents       ::= table_contents:cs table_content:c
+                           {: 
+                              Enumeration e = c.elements();
+		                         
+ 							  while (e.hasMoreElements())
+	      	                     cs.addElement((Node) e.nextElement());
+                              
+							  documentNode = cs;
+                           :}
+                         |
+                         table_content:c
+                           {:
+                                documentNode = c;
+                           :}
+                         ; 
+
+table_content        ::= TBODY:tbody table_contents:c ETBODY:e
+                            {:
+                               Node open = new Node(tbody, null);
+                               Node close = new Node(e, null);
+															 
+                               Vector v = new Vector();
+															 
+                               v.addElement(open);
+                               v.addElement(close);
+															 
+                               documentNode = v;
+                            :} 
+                         |
+                         THEAD:thead table_contents:c ETHEAD:e
+                            {:
+                               Node open = new Node(thead, null);
+                               Node close = new Node(e, null);
+															 
+                               Vector v = new Vector();
+															 
+                               v.addElement(open);
+															 v.addElement(close);
+															 
+                               documentNode = v;
+                            :}
+                          |
+						 TFOOT:tfoot table_contents:c ETFOOT:e
+                           {:
+                              Node open = new Node(tfoot, null);
+                              Node close = new Node(e, null);
+
+                              Vector v = new Vector();
+
+                              v.addElement(open);
+						 								 v.addElement(close);
+
+                              documentNode = v;
+                           :}
+                         |
+                         tr_tag:tr
+                            {:
+                                documentNode = tr;
+                            :}
+                           ;
+
+tr_tag             ::=TR:tr table_cells:cells ETR:e
+                            {:
+                               Node open = new Node(tr, cells);
+                               Node close = new Node(e, null);
+															 
+                               Vector v = new Vector();
+															 
+                               v.addElement(open);
+                               v.addElement(close);
+															 
+                               documentNode = v;
+                           :}  
+                          |
+                          TR:tr ETR:e
+                            {:
+                               Node open = new Node(tr, null);
+                               Node close = new Node(e, null);
+															 
+                               Vector v = new Vector();
+															 
+                               v.addElement(open);
+                               v.addElement(close);
+															 
+                               documentNode = v;
+                           :} 
+                          ; 
+
+table_cells       ::=    table_cells:cells table_cell:cell
+                           {: 
+                              Enumeration e = cell.elements();
+		                          
+							  while (e.hasMoreElements())
+	      	                     cells.addElement((Node) e.nextElement());
+                              
+							  documentNode = cells;
+                           :}
+                         |
+                         table_cell:cell
+                           {:
+                              documentNode = cell;
+                           :}
+                        ;
+
+table_cell        ::=     TD:td body_content:c ETD:e
+                            {:
+                               Node open = new Node(td, c);
+                               Node close = new Node(e, null);
+															 
+                               Vector v = new Vector();
+															 
+                               v.addElement(open);
+                               v.addElement(close);
+															 
+                               documentNode = v;
+                           :} 
+                          |
+                          TH:th body_content:c ETH:e
+                            {:
+                               Node open = new Node(th, c);
+                               Node close = new Node(e, null);
+															 
+                               Vector v = new Vector();
+															 
+                               v.addElement(open);
+                               v.addElement(close);
+															 
+                               documentNode = v;
+                           :} 
+                           ;

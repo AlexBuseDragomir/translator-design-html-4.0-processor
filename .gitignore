@@ -1,0 +1,23 @@
+# Ignore the jflex and java-cup folders
+jflex-1.7.0/
+java-cup/
+
+# Ignore class files
+*.class
+
+# Ignore build folders
+target/
+
+# Ignore IDE-specific files
+.idea/
+.classpath
+.project
+
+# Ignore temporary files
+*.tmp
+*.bak
+*.swp
+
+# Ignore output files
+*.output
+*.log

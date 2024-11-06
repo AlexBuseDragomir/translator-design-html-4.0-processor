@@ -1,0 +1,206 @@
+HTML TAGS AND CONTENT
+
+Tag: <body>
+Tag: <p> ---> contains ---> this is a paragraph 1.23
+Tag: <p> ---> contains ---> here is a horizontal rule:
+Tag: <hr>
+Tag: <p>
+Tag: <br>
+Tag: <br>
+Tag: <br>
+Tag: <h1> ---> contains ---> integer 4423423
+Tag: <h2> ---> contains ---> integer 333
+Tag: <h3> ---> contains ---> double 3232.222
+Tag: <h4> ---> contains ---> double 1.23
+Tag: <h5> ---> contains ---> double 55.32
+Tag: <h6> ---> contains ---> double 11.558
+Tag: <img>
+Tag: <ul>
+Tag: <li> ---> contains ---> a list item 456.23543
+Tag: <li> ---> contains ---> another list item 221.221234
+Tag: <ol>
+Tag: <li> ---> contains ---> a list item 0.434943
+Tag: <li> ---> contains ---> another list item 0.0593943
+Tag: <p>
+Tag: <b> ---> contains ---> this is a bold paragraph 99.99
+Tag: <p>
+Tag: <i> ---> contains ---> this is an italic paragraph 343435
+Tag: <p>
+Tag: <u> ---> contains ---> this is an 990 underlined paragraph
+Tag: <p>
+Tag: <small> ---> contains ---> 100.3 ...this is a small paragraph
+Tag: <p> ---> contains ---> this 222 text contains text 29.45
+Tag: <sub> ---> contains ---> subscript
+Tag: <p> ---> contains ---> this 444 text contains text 345.21
+Tag: <sup> ---> contains ---> superscript
+Tag: <p>
+Tag: <center> ---> contains ---> this text will 777.845 be center-aligned.
+Tag: <p>
+Tag: <p>
+Tag: <font> ---> contains ---> text with special font
+Tag: <a> ---> contains ---> visit 99 ace 99 ucv
+Tag: <br>
+Tag: <br>
+Tag: <br>
+Tag: <table>
+Tag: <tbody>
+Tag: <tr>
+Tag: <th> ---> contains ---> firstname
+Tag: <th> ---> contains ---> lastname
+Tag: <th> ---> contains ---> age
+Tag: <tr>
+Tag: <td> ---> contains ---> first
+Tag: <td> ---> contains ---> name
+Tag: <td> ---> contains ---> 20
+Tag: <tr>
+Tag: <td> ---> contains ---> second
+Tag: <td> ---> contains ---> name
+Tag: <td> ---> contains ---> 30
+Tag: <br>
+Tag: <br>
+Tag: <br>
+Tag: <table>
+Tag: <thead>
+Tag: <tr>
+Tag: <th> ---> contains ---> month
+Tag: <th> ---> contains ---> savings
+Tag: <tbody>
+Tag: <tr>
+Tag: <td> ---> contains ---> january
+Tag: <td> ---> contains ---> $100
+Tag: <tr>
+Tag: <td> ---> contains ---> february
+Tag: <td> ---> contains ---> $80
+Tag: <tfoot>
+Tag: <tr>
+Tag: <td> ---> contains ---> sum
+Tag: <td> ---> contains ---> $180
+Tag: <br>
+Tag: <br>
+Tag: <br>
+Tag: <select>
+Tag: <option> ---> contains ---> first
+Tag: <option> ---> contains ---> second
+Tag: <option> ---> contains ---> third
+Tag: <option> ---> contains ---> fourth
+Tag: <br>
+Tag: <br>
+Tag: <br>
+Tag: <form> ---> contains ---> first name: last name:
+Tag: <br>
+Tag: <input>
+Tag: <br>
+Tag: <br>
+Tag: <input>
+Tag: <br>
+Tag: <br>
+Tag: <input>
+
+
+NUMBER LITERALS
+
+1
+23
+1
+4423423
+1
+2
+333
+2
+3
+3232
+222
+3
+4
+1
+23
+4
+5
+55
+32
+5
+6
+11
+558
+6
+9
+1399208
+300
+200
+456
+23543
+221
+221234
+0
+434943
+0
+593943
+99
+99
+343435
+990
+100
+3
+222
+29
+45
+444
+345
+21
+777
+845
+9900
+4
+99
+99
+1
+20
+30
+2
+100
+80
+180
+1.23
+3232.222
+1.23
+55.32
+11.558
+456.23543
+221.221234
+0.434943
+0.0593943
+99.99
+100.3
+29.45
+345.21
+777.845
+
+
+PROPERTIES (LINKS AND CONFIGS)
+
+"stylesheet"
+"text/css"
+"theme.css"
+"https://images.freeimages.com/images/large-previews/9fc/yet-another-flower-1399208.jpg"
+"300"
+"200"
+"photo of a flower"
+"cursive,serif"
+"#ff9900"
+"4"
+"http://www.ace.ucv.ro/"
+"1"
+"2"
+"first"
+"second"
+"third"
+"fourth"
+"/action_page.php"
+"text"
+"firstname"
+"firstname"
+"text"
+"lastname"
+"lastname"
+"submit"
+"submit"
